@@ -8,7 +8,7 @@ import {Dialog, showDialog} from '@jupyterlab/apputils';
 import {IFileBrowserFactory} from '@jupyterlab/filebrowser';
 import {IMainMenu} from '@jupyterlab/mainmenu';
 import {buildIcon, /*runIcon*/} from '@jupyterlab/ui-components';
-import {Menu} from '@lumino/widgets';
+import {Menu, Widget} from '@lumino/widgets';
 
 // import { ServiceManager } from '@jupyterlab/services';
 
@@ -40,13 +40,25 @@ const extension: JupyterFrontEndPlugin<void> = {
 
     mainMenu.addMenu(collaborativeMenu, {rank: 9999});
 
+    const dialogOptionUnavailable = document.createElement('div');
+    const p = document.createElement('p');
+    p.innerText =
+        'This option is not available in a standalone jupyter instance';
+    dialogOptionUnavailable.appendChild(p);
+
     commands.addCommand(CollabCommandsID.goPersonal, {
       label: 'Go to personal instance',
       caption: 'Go to personal instance',
-      execute: () => {
+      execute: async () => {
         if (document.location.href.indexOf(':8889/lab') != -1) {
           document.location.href = window.location.protocol + '//' +
               window.location.hostname + ':8888/hub/home';
+        } else {
+          await showDialog({
+            title: 'Go to personal instance',
+            body: new Widget({node: dialogOptionUnavailable}),
+            buttons: [Dialog.okButton({label: 'Ok', caption: 'Ok'})]
+          });
         }
       }
     });
@@ -54,11 +66,17 @@ const extension: JupyterFrontEndPlugin<void> = {
     commands.addCommand(CollabCommandsID.goCollaborative, {
       label: 'Go to collaborative instance',
       caption: 'Go to collaborative instance',
-      execute: () => {
+      execute: async () => {
         if (document.location.href.indexOf(':8888/user') != -1) {
           document.location.href = window.location.protocol + '//' +
               window.location.hostname +
               ':8888/services/Collaborative-Jupyter/';
+        } else {
+          await showDialog({
+            title: 'Go to collaborative instance',
+            body: new Widget({node: dialogOptionUnavailable}),
+            buttons: [Dialog.okButton({label: 'Ok', caption: 'Ok'})]
+          });
         }
       }
     });
