@@ -14,6 +14,7 @@ import {Menu} from '@lumino/widgets';
 
 namespace CollabCommandsID {
   export const goPersonal = 'collaborative:to-personal-notebook';
+  export const goCollaborative = 'collaborative:to-collaborative-notebook';
 }
 
 const extension: JupyterFrontEndPlugin<void> = {
@@ -25,29 +26,49 @@ const extension: JupyterFrontEndPlugin<void> = {
       app: JupyterFrontEnd, factory: IFileBrowserFactory,
       mainMenu: IMainMenu) => {
     // const manager = app.serviceManager;
-    const {commands, shell} = app;
 
-    console.log(shell.title);
+    const {
+      commands,
+    } = app;
+    // const {commands, shell} = app;
+
+    // console.log(shell.title);
 
     // add menu tab
     const collaborativeMenu = new Menu({commands});
-    collaborativeMenu.title.label = 'Collaborative Jupyter';
+    collaborativeMenu.title.label = 'Collaborate (Beta)';
 
-    mainMenu.addMenu(collaborativeMenu, {rank: 0});
+    mainMenu.addMenu(collaborativeMenu, {rank: 9999});
 
     commands.addCommand(CollabCommandsID.goPersonal, {
-      label: 'Go to personal Jupyter instance',
-      caption: 'Go to personal Jupyter instance',
+      label: 'Go to personal instance',
+      caption: 'Go to personal instance',
       execute: () => {
-        document.location.href = window.location.protocol + '//' +
-            window.location.hostname + ':8888/hub/home';
+        if (document.location.href.indexOf(':8889/lab') != -1) {
+          document.location.href = window.location.protocol + '//' +
+              window.location.hostname + ':8888/hub/home';
+        }
       }
     });
 
-    const command = CollabCommandsID.goPersonal;
-    collaborativeMenu.addItem({command});
+    commands.addCommand(CollabCommandsID.goCollaborative, {
+      label: 'Go to collaborative instance',
+      caption: 'Go to collaborative instance',
+      execute: () => {
+        if (document.location.href.indexOf(':8888/user') != -1) {
+          document.location.href = window.location.protocol + '//' +
+              window.location.hostname +
+              ':8888/services/Collaborative-Jupyter/';
+        }
+      }
+    });
 
-    console.log(app.serviceManager.sessions);
+    const commandGoPersonal = CollabCommandsID.goPersonal;
+    collaborativeMenu.addItem({command: commandGoPersonal});
+    const commandGoCollaborative = CollabCommandsID.goCollaborative;
+    collaborativeMenu.addItem({command: commandGoCollaborative});
+
+    // console.log(app.serviceManager.sessions);
 
     // this._sessionContext = new SessionContext({
     //   sessionManager: manager.sessions,
