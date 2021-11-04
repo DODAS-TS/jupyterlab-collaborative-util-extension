@@ -46,13 +46,24 @@ const extension: JupyterFrontEndPlugin<void> = {
         'This option is not available in a standalone jupyter instance';
     dialogOptionUnavailable.appendChild(p);
 
+    const dialogAlreadyThere = document.createElement('div');
+    const p_there = document.createElement('p');
+    p_there.innerText = 'You\'re already there...';
+    dialogAlreadyThere.appendChild(p_there);
+
     commands.addCommand(CollabCommandsID.goPersonal, {
       label: 'Go to personal instance',
       caption: 'Go to personal instance',
       execute: async () => {
         if (document.location.href.indexOf(':8889/lab') != -1) {
           document.location.href = window.location.protocol + '//' +
-              window.location.hostname + ':8888/hub/home';
+              window.location.hostname + ':8888/user-redirect/';
+        } else if (document.location.href.indexOf(':8888/user') != -1) {
+          await showDialog({
+            title: 'Go to personal instance',
+            body: new Widget({node: dialogAlreadyThere}),
+            buttons: [Dialog.okButton({label: 'Ok', caption: 'Ok'})]
+          });
         } else {
           await showDialog({
             title: 'Go to personal instance',
@@ -71,6 +82,12 @@ const extension: JupyterFrontEndPlugin<void> = {
           document.location.href = window.location.protocol + '//' +
               window.location.hostname +
               ':8888/services/Collaborative-Jupyter/';
+        } else if (document.location.href.indexOf(':8889/lab') != -1) {
+          await showDialog({
+            title: 'Go to collaborative instance',
+            body: new Widget({node: dialogAlreadyThere}),
+            buttons: [Dialog.okButton({label: 'Ok', caption: 'Ok'})]
+          });
         } else {
           await showDialog({
             title: 'Go to collaborative instance',
